@@ -120,7 +120,6 @@ class RegressionModel(object):
                     return
 
 
-
 class DigitClassificationModel(object):
     """
     A model for handwritten digit classification using the MNIST dataset.
@@ -134,15 +133,19 @@ class DigitClassificationModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
-        self.learning_rate = -0.005
+        "*** YOUR CODE HERE ***"
+
         self.batch_size = 1
-        self.first_w = nn.Parameter(784, 100)
-        self.first_b = nn.Parameter(1,100)
-        self.second_w = nn.Parameter(100, 20)
-        self.second_b = nn.Parameter(1, 20)
-        self.third_w = nn.Parameter(20,10)
+        self.learning_rate = -0.005
+        self.neurons1 = 100
+        self.neurons2 = 50
+        self.first_w = nn.Parameter(784, self.neurons1)
+        self.first_b = nn.Parameter(1, self.neurons1)
+        self.second_w = nn.Parameter(self.neurons1, self.neurons2)
+        self.second_b = nn.Parameter(1, self.neurons2)
+        self.third_w = nn.Parameter(self.neurons2, 10)
         self.third_b = nn.Parameter(1,10)
-        
+
     def run(self, x):
         """
         Runs the model for a batch of examples.
@@ -155,12 +158,13 @@ class DigitClassificationModel(object):
             A node with shape (batch_size x 10) containing predicted scores
                 (also called logits)
         """
+        "*** YOUR CODE HERE ***"
+
         first = nn.ReLU(nn.AddBias(nn.Linear(x, self.first_w), self.first_b))
         second = nn.ReLU(nn.AddBias(nn.Linear(first, self.second_w), self.second_b))
         third = nn.AddBias(nn.Linear(second, self.third_w), self.third_b)
         return third
 
-    
     def get_loss(self, x, y):
         """
         Computes the loss for a batch of examples.
@@ -172,26 +176,26 @@ class DigitClassificationModel(object):
             y: a node with shape (batch_size x 10)
         Returns: a loss node
         """
+        "*** YOUR CODE HERE ***"
+
         return nn.SoftmaxLoss(self.run(x), y)
 
-    
     def train(self, dataset):
         """
         Trains the model.
         """
-        
-        while True:
-            for x, y in dataset.iterate_once(self.batch_size):
-                loss = self.get_loss(x, y)
-                if dataset.get_validation_accuracy() < 0.97:
-                    grads = nn.gradients(loss, [self.first_w, self.first_b, self.second_w, self.second_b, self.third_w, self.third_b])
-                    self.first_w.update(grads[0], self.learning_rate)
-                    self.first_b.update(grads[1], self.learning_rate)
-                    self.second_w.update(grads[2], self.learning_rate)
-                    self.second_b.update(grads[3], self.learning_rate)
-                    self.third_w.update(grads[4], self.learning_rate)
-                    self.third_b.update(grads[5], self.learning_rate)
-                else:
-                    return
+        "*** YOUR CODE HERE ***"
 
-        
+        while True:
+            if dataset.get_validation_accuracy() <= 0.97:
+                for x, y in dataset.iterate_once(self.batch_size):
+                    loss = self.get_loss(x,y)
+                    grad = nn.gradients(loss, [self.first_w, self.first_b, self.second_w, self.second_b, self.third_w, self.third_b])
+                    self.first_w.update(grad[0], self.learning_rate)
+                    self.first_b.update(grad[1], self.learning_rate)
+                    self.second_w.update(grad[2], self.learning_rate)
+                    self.second_b.update(grad[3], self.learning_rate)
+                    self.third_w.update(grad[4], self.learning_rate)
+                    self.third_b.update(grad[5], self.learning_rate)
+            else:
+                return
